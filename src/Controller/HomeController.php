@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class HomeController extends AbstractController
 {
@@ -14,8 +16,10 @@ class HomeController extends AbstractController
 
 
     #[Route('/', name: 'app_home')]
-    public function index():Response
+    public function index(LoggerInterface $logger):Response
     {
+
+        $logger->info('Acessou a home');
 
         $categories = [
             ['title' => 'Mundo',              'text' => 'Notícias sobre o Mundo'],
@@ -31,7 +35,7 @@ class HomeController extends AbstractController
             ['title' => 'Estilo',              'text' => 'Notícias sobre o Estilo'],
             ['title' => 'Viagens',              'text' => 'Notícias sobre o Viagens'],
         ];
-
+        $logger->info('Array criada');
         $pageTitle = "Sistemas de notícias";
         return $this->render('home/home.html.twig', [
             'categories' => $categories,
@@ -63,5 +67,11 @@ class HomeController extends AbstractController
             'categories' => $categories,
             'pageTitle' => $pageTitle,
         ]);
+    }
+    #[Route('/news/{id}')]
+    public function newsDetails(int $id=null, HttpClientInterface $httpClient)
+    {
+        $response = $httpClient->request('GET', 'https://127.0.0.1:8000/api/news/'.$id);
+        dd($response);
     }
 }
